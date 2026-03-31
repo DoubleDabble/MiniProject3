@@ -1,6 +1,4 @@
-# Mini Project 3
-
-The best Mini Project to ever be created.
+# Mini Projetct 3
 
     IN TERMIANL -> python run_game.py
 
