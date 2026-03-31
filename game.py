@@ -50,3 +50,6 @@ class TicTacToe:
         symbols = {1: 'X', -1: 'O', 0: '.'}
         for i in range(0,9,3):
             print(' '.join(symbols[x] for x in self.board[i:i+3]))
+
+
+            #t
