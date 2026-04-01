@@ -24,10 +24,6 @@ class Node:
         """
         Select the best child using the UCB1 formula:
         value/visits + C * sqrt(log(parent_visits) / visits)
-
-        This balances:
-        - Exploitation (good moves)
-        - Exploration (less visited moves)
         """
         choices = []
         for child in self.children:
