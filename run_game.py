@@ -28,7 +28,7 @@ def play():
         # MCTS = O
         else:
             print("AI is thinking...")
-            game = mcts(game, iterations=5000)
+            game = mcts(game, iterations=10000)
         """
         
         game.display()
