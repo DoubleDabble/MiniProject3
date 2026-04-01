@@ -71,7 +71,7 @@ class Node:
             self.parent.backpropagate(result)
 
 
-def mcts(root_game, iterations=5000):
+def mcts(root_game, iterations=10000):
     """
     Perform Monte Carlo Tree Search starting from root_game
     Returns the best next game state
