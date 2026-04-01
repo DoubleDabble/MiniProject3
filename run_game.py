@@ -12,6 +12,24 @@ def play():
 
 
         game = game.make_move(int(move))
+
+        #Use this section instead if running with mcts
+        """
+        # Human = X
+        if game.current_player == 1:
+            move = input("Your move (0-8): ")
+            if not move.isdigit() or int(move) not in game.get_legal_moves():
+                print("Invalid move.")
+                continue
+            
+            game = game.make_move(int(move))
+
+        # MCTS = O
+        else:
+            print("AI is thinking...")
+            game = mcts(game, iterations=5000)
+        """
+        
         game.display()
 
 
