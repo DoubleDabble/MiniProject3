@@ -1,4 +1,5 @@
 from game import TicTacToe
+from mcts import mcts
 
 def play():
     game = TicTacToe()
