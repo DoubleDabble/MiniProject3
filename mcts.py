@@ -27,8 +27,7 @@ class Node:
         """
         choices = []
         for child in self.children:
-            ucb = (child.value / (child.visits + 1e-5)) + \
-                  c_param * math.sqrt(math.log(self.visits + 1) / (child.visits + 1e-5))
+            ucb = (child.value / (child.visits + 1e-5)) + \ c_param * math.sqrt(math.log(self.visits + 1) / (child.visits + 1e-5))
             choices.append(ucb)
         return self.children[choices.index(max(choices))]
 
@@ -71,7 +70,7 @@ class Node:
             self.parent.backpropagate(result)
 
 
-def mcts(root_game, iterations=5000):
+def mcts(root_game, iterations=10000):
     """
     Perform Monte Carlo Tree Search starting from root_game
     Returns the best next game state
