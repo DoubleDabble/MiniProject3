@@ -16,7 +16,7 @@ def get_move_minimax(game, label):
 
 def get_move_mcts(game, label):
     print(f"Player {label} (MCTS AI): ")
-    next_state = mcts(game, iterations=5000)
+    next_state = mcts(game, iterations=10000)
     for i in range(9):
         if next_state.board[i] != game.board[i]:
             return i
