@@ -1,102 +1,145 @@
-import random
 import math
-from game import TicTacToe
+import random
 
-class Node:
-    def __init__(self, game, parent=None):
-        # The current game state at this node
-        self.game = game
+
+class MCTSNode:
+    def __init__(self, state, parent=None, move=None):
+        # Current game state
+        self.state = state
+
         # Parent node
         self.parent = parent
-        # List of child nodes (possible future states)
+
+        # Move that led to this state
+        self.move = move
+
+        # Children nodes
         self.children = []
-        # Number of times this node has been visited
+
+        # MCTS statistics
+        self.wins = 0
         self.visits = 0
-        # Total value (wins - losses accumulated)
-        self.value = 0
-        # Moves we have not explored yet from this state
-        self.untried_moves = game.get_legal_moves()
+
+        # Moves not yet explored
+        self.untried_moves = state.get_legal_moves()
 
     def is_fully_expanded(self):
+        # True if all moves have been tried
         return len(self.untried_moves) == 0
 
-    def best_child(self, c_param=1.4):
+    def best_child(self, c=2.0):
         """
-        Select the best child using the UCB1 formula:
-        value/visits + C * sqrt(log(parent_visits) / visits)
+        Select child using UCB1 formula:
+        UCB1 = (wins / visits) + C * sqrt(ln(parent_visits) / visits)
         """
-        choices = []
+        best_score = -float('inf')
+        best_node = None
+
         for child in self.children:
-            ucb = (child.value / (child.visits + 1e-5)) + c_param * math.sqrt(math.log(self.visits + 1) / (child.visits + 1e-5))
-            choices.append(ucb)
-        return self.children[choices.index(max(choices))]
+            if child.visits == 0:
+                return child  # explore unvisited nodes immediately
 
-    def expand(self):
+            exploitation = child.wins / child.visits
+            exploration = c * math.sqrt(
+                math.log(self.visits + 1) / child.visits   # +1 FIX
+            )
+
+            score = exploitation + exploration
+
+            if score > best_score:
+                best_score = score
+                best_node = child
+
+        return best_node
+
+    def best_move(self):
         """
-        Take one untried move and create a new child node
+        Return move with highest visit count
+        (NOT highest win rate, per assignment)
         """
-        move = self.untried_moves.pop()
-        next_game = self.game.make_move(move)
-        child = Node(next_game, self)
-        self.children.append(child)
-        return child
-
-    def simulate(self):
-        """
-        Play a random game (rollout) from this position until terminal state
-        """
-        current_game = self.game
-
-        while not current_game.is_terminal():
-            # Pick a random legal move
-            move = random.choice(current_game.get_legal_moves())
-            current_game = current_game.make_move(move)
-        
-        # Return result of the game:
-        # +1 (X wins), -1 (O wins), 0 (draw)
-        return current_game.utility()
-
-    def backpropagate(self, result):
-        """
-        Update this node and all ancestors with the simulation result
-        """
-        # Increase visit count
-        self.visits += 1
-        # Add result to total value
-        self.value += result
-
-        # Recursively update parent
-        if self.parent:
-            self.parent.backpropagate(result)
+        return max(self.children, key=lambda c: c.visits).move
 
 
-def mcts(root_game, iterations=10000):
+# 1. SELECTION
+def select(node):
     """
-    Perform Monte Carlo Tree Search starting from root_game
-    Returns the best next game state
+    Traverse the tree using UCB1 until:
+    - node is not fully expanded OR
+    - node is terminal
     """
-    root = Node(root_game)
+    while not node.state.is_terminal():
+        if not node.is_fully_expanded():
+            return node
+        if not node.children:
+            return node
+        node = node.best_child()
+    return node
+
+
+# 2. EXPANSION
+def expand(node):
+    """
+    Expand one untried move
+    """
+    move = node.untried_moves.pop()
+    next_state = node.state.make_move(move)
+
+    child = MCTSNode(next_state, parent=node, move=move)
+    node.children.append(child)
+
+    return child
+
+
+# 3. SIMULATION
+def simulate(state):
+    """
+    Play random moves until game ends
+    """
+    current_state = state
+
+    while not current_state.is_terminal():
+        move = random.choice(current_state.get_legal_moves())
+        current_state = current_state.make_move(move)
+
+    return current_state.utility()
+
+
+# 4. BACKPROPAGATION
+def backpropagate(node, result):
+    """
+    Update nodes from leaf to root
+    Only count win if favorable for player who made the move
+    """
+    while node is not None:
+        node.visits += 1
+
+        # If the player who JUST moved at this node won
+        if node.state.current_player == -result:
+            node.wins += 1
+
+        node = node.parent
+
+
+# MAIN MCTS LOOP
+def mcts(state, iterations=1000):
+    root = MCTSNode(state)
 
     for _ in range(iterations):
-        node = root
 
         # 1. Selection
-        # Move down the tree using best_child until we reach a node
-        # that is not fully expanded
-        while node.is_fully_expanded() and node.children:
-            node = node.best_child()
+        leaf = select(root)
 
         # 2. Expansion
-        # If the node is not terminal, expand it
-        if not node.game.is_terminal():
-            node = node.expand()
+        if not leaf.state.is_terminal():
+            leaf = expand(leaf)
 
         # 3. Simulation
-        result = node.simulate()
+        result = simulate(leaf.state)
 
         # 4. Backpropagation
-        node.backpropagate(result)
+        backpropagate(leaf, result)
 
-    # Pick best move (most visits)
-    best_child = max(root.children, key=lambda c: c.visits)
-    return best_child.game
+    # Return best move (NOT state)
+    if not root.children:
+        return random.choice(state.get_legal_moves())
+    return root.best_move()
