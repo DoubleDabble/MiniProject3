@@ -27,7 +27,7 @@ class MCTSNode:
         # True if all moves have been tried
         return len(self.untried_moves) == 0
 
-    def best_child(self, c=2.0):
+    def best_child(self, c=1.41):
         """
         Select child using UCB1 formula:
         UCB1 = (wins / visits) + C * sqrt(ln(parent_visits) / visits)
@@ -121,7 +121,7 @@ def backpropagate(node, result):
 
 
 # MAIN MCTS LOOP
-def mcts(state, iterations=1000):
+def mcts(state, iterations=10000):
     root = MCTSNode(state)
 
     for _ in range(iterations):
