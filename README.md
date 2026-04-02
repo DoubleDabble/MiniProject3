@@ -2,7 +2,7 @@
 
 The best Mini Project to ever be created.
 
-    IN TERMIANL -> python run_game.py
+    IN TERMINAL -> python run_game.py
 
 
 
