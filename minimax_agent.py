@@ -1,42 +1,71 @@
+node_count = [0]  # mutable counter — [0] so it can be modified inside functions
+
 def minimax(state):
-	# Return the best move for the current player.
-	if state.current_player == 1:
-		best_value = float('-inf')
-		best_move = None
-		for move in state.get_legal_moves():
-			child = state.make_move(move)
-			value = min_value(child)
-			if value > best_value:
-				best_value = value
-				best_move = move
-		return best_move
-	else:
-		# TODO: implement the symmetric case
-		# for MIN.
-		best_value = float('inf')
-		best_move = None
-		for move in state.get_legal_moves():
-			child = state.make_move(move)
-			value = max_value(child)
-			if value < best_value:
-				best_value = value
-				best_move = move
-		return best_move
+    if state.current_player == 1:
+        best_value = float('-inf')
+        best_move = None
+        for move in state.get_legal_moves():
+            child = state.make_move(move)
+            #value = min_value(child)
+            value = min_value_ab(child, float('-inf'), float('inf'))
+            if value > best_value:
+                best_value = value
+                best_move = move
+        return best_move
+    else:
+        best_value = float('inf')
+        best_move = None
+        for move in state.get_legal_moves():
+            child = state.make_move(move)
+            #value = max_value(child)
+            value = max_value_ab(child, float('-inf'), float('inf'))
+            if value < best_value:
+                best_value = value
+                best_move = move
+        return best_move
 
 def max_value(state):
-	if state.is_terminal():
-		return state.utility()
-	v = float('-inf')
-	for move in state.get_legal_moves():
-		child = state.make_move(move)
-		v = max(v, min_value(child))
-	return v
+    node_count[0] += 1  # count this node
+    if state.is_terminal():
+        return state.utility()
+    v = float('-inf')
+    for move in state.get_legal_moves():
+        child = state.make_move(move)
+        v = max(v, min_value(child))
+    return v
 
 def min_value(state):
-	if state.is_terminal():
-		return state.utility()
-	v = float('inf')
-	for move in state.get_legal_moves():
-		child = state.make_move(move)
-		v = min(v, max_value(child))
-	return v
+    node_count[0] += 1  # count this node
+    if state.is_terminal():
+        return state.utility()
+    v = float('inf')
+    for move in state.get_legal_moves():
+        child = state.make_move(move)
+        v = min(v, max_value(child))
+    return v
+
+def max_value_ab(state, alpha, beta):
+    node_count[0] += 1
+    if state.is_terminal():
+        return state.utility()
+    v = float('-inf')
+    for move in state.get_legal_moves():
+        child = state.make_move(move)
+        v = max(v, min_value_ab(child, alpha, beta))
+        if v >= beta:
+            return v
+        alpha = max(alpha, v)
+    return v
+
+def min_value_ab(state, alpha, beta):
+    node_count[0] += 1
+    if state.is_terminal():
+        return state.utility()
+    v = float('inf')
+    for move in state.get_legal_moves():
+        child = state.make_move(move)
+        v = min(v, max_value_ab(child, alpha, beta))
+        if v <= alpha:
+            return v
+        beta = min(beta, v)
+    return v
