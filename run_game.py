@@ -19,7 +19,7 @@ def get_move_mcts(game, label):
     return mcts(game,iterations=10000)
 
 def play():
-    print("=== Tic Tac Toe ===")
+    print("====== Tic Tac Toe ======")
     print("1. Two players")
     print("2. Player vs Minimax AI")
     print("3. Player vs MCTS AI")

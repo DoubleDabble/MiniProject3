@@ -25,7 +25,7 @@ def minimax(state):
         return best_move
 
 def max_value(state):
-    node_count[0] += 1  # count this node
+    node_count[0] += 1  
     if state.is_terminal():
         return state.utility()
     v = float('-inf')
@@ -35,7 +35,7 @@ def max_value(state):
     return v
 
 def min_value(state):
-    node_count[0] += 1  # count this node
+    node_count[0] += 1  
     if state.is_terminal():
         return state.utility()
     v = float('inf')
